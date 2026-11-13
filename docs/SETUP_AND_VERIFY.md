@@ -51,6 +51,8 @@ This generates, validates and evaluates 1,500 customers in about 10 s. Expected 
 
 For the full dataset (20,000 customers, about 1 minute, about 650 MB): `python -m churnlab all --scale full`
 
+**Want to see the result first?** Open `docs/sample_report.html` in a browser. It is a saved copy of the full 20,000-customer run, so no installation is needed.
+
 **Interactive report (optional, recommended):** `python -m churnlab demo` does all of the above into `output/demo/` and prints the headline results. Then open **`output/demo/report.html`** in any browser (no internet needed). Five tabs: Overview, Churn behaviour, Offer test, Targeting, Data quality. To build it for an existing run: `python -m churnlab report --out output/starter`.
 
 ## 4. Verify

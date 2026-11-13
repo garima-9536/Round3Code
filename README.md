@@ -15,7 +15,7 @@ A reproducible synthetic-data generator, validator and evaluator for the workflo
 - **Treating everyone loses money.** 87% of offer cost went to accepters who would have stayed anyway. Targeting a small top share is positive, though noisy.
 - **The data can be trusted.** 28 automated checks, 0 structural errors, all 200 injected edge cases detected, and regenerating twice gives identical files.
 
-See it interactively: `python -m churnlab demo`, then open `output/demo/report.html`. Where each requirement of the brief is met: [docs/TRACEABILITY.md](docs/TRACEABILITY.md).
+See it interactively: open [docs/sample_report.html](docs/sample_report.html) (a saved copy of the full run, no setup needed), or run `python -m churnlab demo` and open `output/demo/report.html`. Where each requirement of the brief is met: [docs/TRACEABILITY.md](docs/TRACEABILITY.md).
 
 ## Quick start
 
