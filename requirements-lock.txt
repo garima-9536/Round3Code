@@ -1,0 +1,7 @@
+# Exact versions the shipped results were produced with (Python 3.14.5, Windows 11).
+# Use this file for byte-identical checksums; use requirements.txt for a looser install.
+numpy==2.4.6
+pandas==3.0.3
+scikit-learn==1.9.1
+scipy==1.18.1
+pytest==9.2.0

@@ -4,15 +4,28 @@ A reproducible synthetic-data generator, validator and evaluator for the workflo
 *"identify likely churn from behavioural changes, then test retention offers with eligibility, cost and outcome tracking"*.
 
 - **20,000 customers / 21,449 subscriptions over 18 months** (2025-07 .. 2026-12), 14% churn (voluntary + involuntary), plan changes, a price-increase shock, seasonal users, offer non-response.
-- 17 linked tables with explicit PK/FK, including a pre-customer prospect funnel, effective-dated rules, event history, a randomised treatment/control campaign, and a **separate ground truth**.
+- 18 linked tables with explicit PK/FK, including a pre-customer prospect funnel, effective-dated rules, event history, a randomised treatment/control campaign, and a **separate ground truth**.
 - One generator for starter (1,500 customers) and full (20,000) scale; fixed seed `20261022`.
 - Validation (PK/FK/enums/dates/arithmetic/lifecycle/duplicates/eligibility/leakage), a temporal churn model, and an experiment analysis that separates **incremental lift from correlation**.
 
+## The result in 60 seconds (full run, 20,000 customers)
+
+- **Behaviour predicts churn.** A model trained only on earlier months reaches AUC 0.73-0.74 on the next quarter, against 0.64 for a simple "usage dropped" rule.
+- **A naive analysis is misleading.** Comparing customers who accepted an offer with those who did not shows about 0 effect. The randomised holdout shows **1.35 points lower churn** (95% CI 0.33 to 2.37, p = 0.009). The true effect, known because the data is synthetic, is 2.1 points.
+- **Treating everyone loses money.** 87% of offer cost went to accepters who would have stayed anyway. Targeting a small top share is positive, though noisy.
+- **The data can be trusted.** 28 automated checks, 0 structural errors, all 200 injected edge cases detected, and regenerating twice gives identical files.
+
+See it interactively: `python -m churnlab demo`, then open `output/demo/report.html`. Where each requirement of the brief is met: [docs/TRACEABILITY.md](docs/TRACEABILITY.md).
+
 ## Quick start
 
-```bash
-pip install -r requirements.txt            # numpy, pandas, scikit-learn, scipy, pytest (Python 3.10+)
+**New here? Follow [docs/SETUP_AND_VERIFY.md](docs/SETUP_AND_VERIFY.md)**: install, run, and a checklist with the expected results.
 
+```bash
+pip install -r requirements-lock.txt       # exact versions (or requirements.txt); Python 3.10+, tested on 3.14
+
+python -m churnlab demo                    # everything + interactive report.html (~10 s)   -> output/demo
+python -m churnlab report --out output/full   # interactive report for an existing run
 python -m churnlab all --scale starter     # generate + validate + evaluate   (~10 s)  -> output/starter
 python -m churnlab all --scale full        # 20,000 customers                 (~1 min) -> output/full
 
@@ -21,7 +34,7 @@ python -m churnlab validate --out output/full
 python -m churnlab evaluate --out output/full
 python -m churnlab repro --scale full      # regenerate twice, compare row counts + SHA-256  -> docs/repro_check_full.md
 python -m churnlab docs                    # data dictionary + ER diagram -> docs/
-python -m pytest tests -q                  # 15 tests
+python -m pytest tests -q                  # 21 tests
 python scripts/calibrate.py                # how the churn intercepts were chosen
 ```
 

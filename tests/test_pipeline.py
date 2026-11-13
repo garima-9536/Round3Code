@@ -286,3 +286,17 @@ def test_hiding_flag_changes_nothing_else(built, hidden):
         assert a[k].equals(b[k]), k
     keep = [c for c in a["campaign_contacts"].columns if c not in ("contact_source", "launched_by_role", "eligibility_evaluation_id")]
     assert a["campaign_contacts"][keep].equals(b["campaign_contacts"][keep])
+
+
+def test_html_report_is_built_from_a_finished_run(built):
+    import re
+    from churnlab.evaluate.report import run_evaluation
+    from churnlab.report_html import build_report
+    _, out = built
+    run_validation(out, check_sql_load=False)
+    run_evaluation(out)
+    html = build_report(out).read_text(encoding="utf-8")
+    assert "Churn and retention-offer report" in html and "https://" not in html and "http://" not in html   # self-contained, offline
+    blob = re.search(r'<script id="data" type="application/json">(.*?)</script>', html, re.S).group(1)
+    data = json.loads(blob)
+    assert data["val"]["passed"] and "offer_experiment" in data["eval"] and data["dist"]["primary_churn_events_by_month"]

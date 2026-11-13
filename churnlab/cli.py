@@ -51,6 +51,30 @@ def cmd_evaluate(a, out: Path | None = None) -> dict:
     return r
 
 
+def cmd_report(a, out: Path | None = None) -> Path:
+    from .report_html import build_report
+    path = build_report(out or Path(a.out))
+    print(f"[report] open in a browser -> {path}")
+    return path
+
+
+def cmd_demo(a) -> None:
+    """Generate + validate + evaluate + report in one go (default: starter scale into output/demo), then print the headline results."""
+    a.out = a.out or str(DEFAULT_OUT / "demo")
+    out = cmd_generate(a)
+    ok = cmd_validate(a, out)["passed"]
+    ev = cmd_evaluate(a, out)
+    cmd_report(a, out)
+    x = ev["offer_experiment"]
+    itt, naive = x["incremental_lift_ITT"], x["naive_correlational_estimates"]
+    print("\nHeadline results")
+    print(f"  validation                    : {'PASS' if ok else 'FAIL'}")
+    print(f"  naive (accepters vs others)   : {naive['accepters_vs_non_accepters_churn_reduction'] * 100:+.2f} pts churn reduction")
+    print(f"  randomised test (ITT)         : {itt['churn_reduction_abs'] * 100:+.2f} pts  (95% CI {itt['ci95'][0] * 100:+.2f} to {itt['ci95'][1] * 100:+.2f}, p={itt['p_value']:.3f})")
+    print(f"  offer cost on likely stayers  : {x['scored_against_ground_truth']['share_of_total_offer_cost_wasted'] * 100:.0f}%")
+    sys.exit(0 if ok else 1)
+
+
 def cmd_repro(a):
     from .repro import run_repro
     cfg = _cfg_from_args(a)
@@ -79,6 +103,10 @@ def main(argv=None):
     p.add_argument("--no-sql", action="store_true")
     p = sub.add_parser("evaluate")
     p.add_argument("--out", required=True)
+    p = sub.add_parser("report", help="build an interactive HTML report (report.html) from a finished run")
+    p.add_argument("--out", required=True)
+    p = sub.add_parser("demo", help="starter-scale generate + validate + evaluate + report into output/demo, then print headline results")
+    common(p)
     p = sub.add_parser("repro")
     common(p)
     p.add_argument("--report", default=None)
@@ -102,6 +130,10 @@ def main(argv=None):
         ok = cmd_validate(a, out)["passed"]
         cmd_evaluate(a, out)
         sys.exit(0 if ok else 1)
+    elif a.cmd == "report":
+        cmd_report(a)
+    elif a.cmd == "demo":
+        cmd_demo(a)
     elif a.cmd == "repro":
         cmd_repro(a)
 
